@@ -1,0 +1,13 @@
+Makefile
+build/
+google_apis/
+net/
+talk/*.target.mk
+talk/*.Makefile
+third_party/
+tools/clang/
+tools/gyp/
+tools/python/
+tools/valgrind/
+tools/win/
+
