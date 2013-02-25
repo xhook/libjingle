@@ -3,7 +3,7 @@ use_relative_paths = True
 vars = {
   # Override root_dir in your .gclient's custom_vars to specify a custom root
   # folder name.
-  "root_dir": "trunk",
+  "root_dir": "libjingle",
   "extra_gyp_flag": "-Dextra_gyp_flag=0",
 
   "googlecode_url": "http://%s.googlecode.com/svn",
