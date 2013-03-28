@@ -473,6 +473,8 @@
         'media/webrtc/webrtcvideoengine.h',
         'media/webrtc/webrtcvideoframe.cc',
         'media/webrtc/webrtcvideoframe.h',
+        'media/webrtc/webrtcvideorenderer.cc',
+        'media/webrtc/webrtcvideorenderer.h',
         'media/webrtc/webrtcvie.h',
         'media/webrtc/webrtcvoe.h',
         'media/webrtc/webrtcvoiceengine.cc',
