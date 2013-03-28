@@ -121,16 +121,18 @@ static bool FormatToCapability(const VideoFormat& format,
 // Implementation of class WebRtcVideoCapturer
 ///////////////////////////////////////////////////////////////////////////
 
-WebRtcVideoCapturer::WebRtcVideoCapturer()
+WebRtcVideoCapturer::WebRtcVideoCapturer(talk_base::Thread* thread)
     : factory_(new WebRtcVcmFactory),
       module_(NULL),
-      captured_frames_(0) {
+      captured_frames_(0),
+      VideoCapturer(thread) {
 }
 
-WebRtcVideoCapturer::WebRtcVideoCapturer(WebRtcVcmFactoryInterface* factory)
+WebRtcVideoCapturer::WebRtcVideoCapturer(WebRtcVcmFactoryInterface* factory, talk_base::Thread* thread)
     : factory_(factory),
       module_(NULL),
-      captured_frames_(0) {
+      captured_frames_(0),
+      VideoCapturer(thread) {
 }
 
 WebRtcVideoCapturer::~WebRtcVideoCapturer() {
@@ -280,7 +282,6 @@ CaptureState WebRtcVideoCapturer::Start(const VideoFormat& capture_format) {
 
 void WebRtcVideoCapturer::Stop() {
   if (IsRunning()) {
-    talk_base::Thread::Current()->Clear(this);
     module_->StopCapture();
     module_->DeRegisterCaptureDataCallback();
 
@@ -322,6 +323,8 @@ void WebRtcVideoCapturer::OnIncomingCapturedFrame(const WebRtc_Word32 id,
                  << sample.width() << "x" << sample.height()
                  << ". Expected format " << GetCaptureFormat()->ToString();
   }
+
+  SignalI420FrameCaptured(this, &sample);
 
   // Signal down stream components on captured frame.
   // The CapturedFrame class doesn't support planes. We have to ExtractBuffer

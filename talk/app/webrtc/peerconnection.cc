@@ -72,6 +72,7 @@ enum {
   MSG_ICEGATHERINGCHANGE,
   MSG_ICECANDIDATE,
   MSG_ICECOMPLETE,
+  MSG_ICETIMEOUT,
 };
 
 struct CandidateMsg : public talk_base::MessageData {
@@ -631,6 +632,10 @@ void PeerConnection::OnMessage(talk_base::Message* msg) {
       observer_->OnIceComplete();
       break;
     }
+    case MSG_ICETIMEOUT: {
+      observer_->OnCandidateTimeout();
+      break;
+    }
     default:
       ASSERT(false && "Not implemented");
       break;
@@ -684,6 +689,10 @@ void PeerConnection::OnIceCandidate(const IceCandidateInterface* candidate) {
 
 void PeerConnection::OnIceComplete() {
   signaling_thread()->Post(this, MSG_ICECOMPLETE);
+}
+
+void PeerConnection::OnCandidateTimeout() {
+  signaling_thread()->Post(this, MSG_ICETIMEOUT);
 }
 
 void PeerConnection::ChangeSignalingState(

@@ -32,6 +32,8 @@
 #include "talk/media/base/videoprocessor.h"
 #include "talk/media/base/videorenderer.h"
 
+#include "common_video/interface/i420_video_frame.h"
+
 namespace cricket {
 
 CaptureRenderAdapter::CaptureRenderAdapter(VideoCapturer* video_capturer)
@@ -84,13 +86,13 @@ bool CaptureRenderAdapter::RemoveRenderer(VideoRenderer* video_renderer) {
 }
 
 void CaptureRenderAdapter::Init() {
-  video_capturer_->SignalVideoFrame.connect(
+  video_capturer_->SignalI420FrameCaptured.connect(
       this,
       &CaptureRenderAdapter::OnVideoFrame);
 }
 
 void CaptureRenderAdapter::OnVideoFrame(VideoCapturer* capturer,
-                                        const VideoFrame* video_frame) {
+                                        const webrtc::I420VideoFrame* video_frame) {
   talk_base::CritScope cs(&capture_crit_);
   if (video_renderers_.empty()) {
     return;
@@ -105,18 +107,18 @@ void CaptureRenderAdapter::OnVideoFrame(VideoCapturer* capturer,
 }
 
 // The renderer_crit_ lock needs to be taken when calling this function.
-void CaptureRenderAdapter::MaybeSetRenderingSize(const VideoFrame* frame) {
+void CaptureRenderAdapter::MaybeSetRenderingSize(const webrtc::I420VideoFrame* frame) {
   for (VideoRenderers::iterator iter = video_renderers_.begin();
        iter != video_renderers_.end(); ++iter) {
-    const bool new_resolution = iter->render_width != frame->GetWidth() ||
-        iter->render_height != frame->GetHeight();
+    const bool new_resolution = iter->render_width != frame->width() ||
+        iter->render_height != frame->height();
     if (new_resolution) {
-      if (iter->renderer->SetSize(frame->GetWidth(), frame->GetHeight(), 0)) {
-        iter->render_width = frame->GetWidth();
-        iter->render_height = frame->GetHeight();
+      if (iter->renderer->SetSize(frame->width(), frame->height(), 0)) {
+        iter->render_width = frame->width();
+        iter->render_height = frame->height();
       } else {
         LOG(LS_ERROR) << "Captured frame size not supported by renderer: " <<
-            frame->GetWidth() << " x " << frame->GetHeight();
+            frame->width() << " x " << frame->height();
       }
     }
   }

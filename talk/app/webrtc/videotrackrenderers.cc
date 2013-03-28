@@ -75,7 +75,7 @@ bool VideoTrackRenderers::SetSize(int width, int height, int reserved) {
   return true;
 }
 
-bool VideoTrackRenderers::RenderFrame(const cricket::VideoFrame* frame) {
+bool VideoTrackRenderers::RenderFrame(const webrtc::I420VideoFrame* frame) {
   talk_base::CritScope cs(&critical_section_);
   if (!enabled_) {
     return true;

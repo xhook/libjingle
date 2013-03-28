@@ -94,7 +94,7 @@ class FakeDeviceManager : public DeviceManagerInterface {
   virtual void ClearVideoCaptureDeviceMaxFormat(const std::string& uvc_id) {
     max_formats_.erase(uvc_id);
   }
-  virtual VideoCapturer* CreateVideoCapturer(const Device& device) const {
+  virtual VideoCapturer* CreateVideoCapturer(const Device& device) {
     return new FakeVideoCapturer();
   }
   virtual bool GetWindows(
@@ -183,6 +183,12 @@ class FakeDeviceManager : public DeviceManagerInterface {
 
     return FindDeviceByName(vidcap_devices_, name, out);
   }
+
+  virtual bool GetVideoCaptureDeviceById(const std::string& id,
+                                         Device* out) {
+    return false;
+  }
+
   bool GetAudioDevice(bool is_input, const std::string& name,
                       Device* out) {
     // If the name is empty, return the default device.

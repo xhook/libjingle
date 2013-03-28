@@ -49,6 +49,7 @@ class VideoCaptureModule;
 class VideoDecoder;
 class VideoRender;
 class ViEExternalCapture;
+class I420VideoFrame;
 }
 
 namespace cricket {
@@ -112,6 +113,7 @@ class WebRtcVideoEngine : public sigslot::has_slots<>,
   CaptureState UpdateCapturingState();
   bool IsCapturing() const;
   void OnFrameCaptured(VideoCapturer* capturer, const CapturedFrame* frame);
+  void OnI420FrameCaptured(VideoCapturer* capturer, const webrtc::I420VideoFrame* frame);
 
   // Set the VoiceEngine for A/V sync. This can only be called before Init.
   bool SetVoiceEngine(WebRtcVoiceEngine* voice_engine);

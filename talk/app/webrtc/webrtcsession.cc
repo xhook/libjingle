@@ -1012,6 +1012,7 @@ void WebRtcSession::OnMessage(talk_base::Message* msg) {
     case MSG_CANDIDATE_TIMEOUT:
       LOG(LS_ERROR) << "Transport is not in writable state.";
       SignalError();
+      ice_observer_->OnCandidateTimeout();
       break;
     default:
       cricket::BaseSession::OnMessage(msg);

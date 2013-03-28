@@ -35,6 +35,7 @@
 #include "talk/base/scoped_ptr.h"
 #include "talk/base/sigslot.h"
 #include "talk/base/stringencode.h"
+#include "talk/base/thread.h"
 #include "talk/base/window.h"
 #include "talk/media/base/videocommon.h"
 
@@ -48,6 +49,8 @@ class WindowPicker;
 namespace cricket {
 
 class VideoCapturer;
+class DeviceManagerInterface;
+class DeviceManager;
 
 // Used to represent an audio or video capture or render device.
 struct Device {
@@ -68,7 +71,7 @@ class VideoCapturerFactory {
   VideoCapturerFactory() {}
   virtual ~VideoCapturerFactory() {}
 
-  virtual VideoCapturer* Create(const Device& device) = 0;
+  virtual VideoCapturer* Create(const Device& device, DeviceManager * manager) = 0;
 };
 
 // DeviceManagerInterface - interface to manage the audio and
@@ -93,6 +96,7 @@ class DeviceManagerInterface {
 
   virtual bool GetVideoCaptureDevices(std::vector<Device>* devs) = 0;
   virtual bool GetVideoCaptureDevice(const std::string& name, Device* out) = 0;
+  virtual bool GetVideoCaptureDeviceById(const std::string& id, Device* out) = 0;
 
   // Caps the capture format according to max format for capturers created
   // by CreateVideoCapturer(). See ConstrainSupportedFormats() in
@@ -105,7 +109,7 @@ class DeviceManagerInterface {
   virtual void ClearVideoCaptureDeviceMaxFormat(const std::string& uvc_id) = 0;
 
   // Device creation
-  virtual VideoCapturer* CreateVideoCapturer(const Device& device) const = 0;
+  virtual VideoCapturer* CreateVideoCapturer(const Device& device) = 0;
 
   virtual bool GetWindows(
       std::vector<talk_base::WindowDescription>* descriptions) = 0;
@@ -137,7 +141,9 @@ class DeviceManagerFactory {
   DeviceManagerFactory() {}
 };
 
-class DeviceManager : public DeviceManagerInterface {
+class DeviceManager
+	: public DeviceManagerInterface,
+	  public talk_base::Thread {
  public:
   DeviceManager();
   virtual ~DeviceManager();
@@ -163,12 +169,13 @@ class DeviceManager : public DeviceManagerInterface {
 
   virtual bool GetVideoCaptureDevices(std::vector<Device>* devs);
   virtual bool GetVideoCaptureDevice(const std::string& name, Device* out);
+  virtual bool GetVideoCaptureDeviceById(const std::string& id, Device* out);
 
   virtual void SetVideoCaptureDeviceMaxFormat(const std::string& uvc_id,
                                               const VideoFormat& max_format);
   virtual void ClearVideoCaptureDeviceMaxFormat(const std::string& uvc_id);
 
-  virtual VideoCapturer* CreateVideoCapturer(const Device& device) const;
+  virtual VideoCapturer* CreateVideoCapturer(const Device& device);
 
   virtual bool GetWindows(
       std::vector<talk_base::WindowDescription>* descriptions);

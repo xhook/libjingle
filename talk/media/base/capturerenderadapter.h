@@ -74,9 +74,9 @@ class CaptureRenderAdapter : public sigslot::has_slots<> {
   void Init();
 
   // Callback for frames received from the capturer.
-  void OnVideoFrame(VideoCapturer* capturer, const VideoFrame* video_frame);
+  void OnVideoFrame(VideoCapturer* capturer, const webrtc::I420VideoFrame* video_frame);
 
-  void MaybeSetRenderingSize(const VideoFrame* frame);
+  void MaybeSetRenderingSize(const webrtc::I420VideoFrame* frame);
 
   bool IsRendererRegistered(const VideoRenderer& video_renderer) const;
 

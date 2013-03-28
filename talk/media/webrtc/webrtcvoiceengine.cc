@@ -457,11 +457,14 @@ bool WebRtcVoiceEngine::InitInternal() {
   voe_wrapper_sc_->hw()->SetAudioDeviceLayer(webrtc::kAudioLinuxAlsa);
 #endif
 
+//efilatov: it's not possible to create more than one opensles engine on Android 2.3 (LG L3 Optimus)
+#if !defined(ANDROID) || !defined(HACK_ANDROID23_NO_CLIPS)
   // Initialize the VoiceEngine instance that we'll use to play out sound clips.
   if (voe_wrapper_sc_->base()->Init(adm_sc_) == -1) {
     LOG_RTCERR0_EX(Init, voe_wrapper_sc_->error());
     return false;
   }
+#endif
 
   // On Windows, tell it to use the default sound (not communication) devices.
   // First check whether there is a valid sound device for playback.
@@ -612,6 +615,12 @@ bool WebRtcVoiceEngine::ApplyOptions(const AudioOptions& options_in) {
   // Conference mode doesn't work well on ChromeOS.
   options.conference_mode.Set(false);
 #endif  // CHROMEOS
+
+// Disable echo canncellation ond noise suppression on iOS platform
+#ifdef IOS
+  options.echo_cancellation.Set(false);
+  options.noise_suppression.Set(false);
+#endif // IOS
 
   LOG(LS_INFO) << "Applying audio options: " << options.ToString();
 

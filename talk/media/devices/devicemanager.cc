@@ -73,9 +73,9 @@ class DefaultVideoCapturerFactory : public VideoCapturerFactory {
   DefaultVideoCapturerFactory() {}
   virtual ~DefaultVideoCapturerFactory() {}
 
-  VideoCapturer* Create(const Device& device) {
+  VideoCapturer* Create(const Device& device, DeviceManager * manager) {
 #if defined(VIDEO_CAPTURER_NAME)
-    VIDEO_CAPTURER_NAME* return_value = new VIDEO_CAPTURER_NAME;
+    VIDEO_CAPTURER_NAME* return_value = new VIDEO_CAPTURER_NAME(manager);
     if (!return_value->Init(device)) {
       delete return_value;
       return NULL;
@@ -91,6 +91,8 @@ DeviceManager::DeviceManager()
     : initialized_(false),
       device_video_capturer_factory_(new DefaultVideoCapturerFactory),
       window_picker_(talk_base::WindowPickerFactory::CreateWindowPicker()) {
+  this->SetName("DeviceManager", NULL);
+  this->Start();
 }
 
 DeviceManager::~DeviceManager() {
@@ -189,6 +191,25 @@ bool DeviceManager::GetVideoCaptureDevice(const std::string& name,
   return false;
 }
 
+bool DeviceManager::GetVideoCaptureDeviceById(const std::string& id,
+                                          Device* out) {
+  std::vector<Device> devices;
+  if (!GetVideoCaptureDevices(&devices)) {
+    return false;
+  }
+
+  for (std::vector<Device>::const_iterator it = devices.begin();
+      it != devices.end(); ++it) {
+    if (id == it->id) {
+      LOG(LS_INFO) << "Creating VideoCapturer for " << it->name;
+      *out = *it;
+      return true;
+    }
+  }
+
+  return false;
+}
+
 void DeviceManager::SetVideoCaptureDeviceMaxFormat(
     const std::string& uvc_id,
     const VideoFormat& max_format) {
@@ -200,8 +221,8 @@ void DeviceManager::ClearVideoCaptureDeviceMaxFormat(
   max_formats_.erase(uvc_id);
 }
 
-VideoCapturer* DeviceManager::CreateVideoCapturer(const Device& device) const {
-#if defined(IOS)
+VideoCapturer* DeviceManager::CreateVideoCapturer(const Device& device) {
+#if defined(IOS) || defined(ANDROID)
   LOG_F(LS_ERROR) << " should never be called!";
   return NULL;
 #else
@@ -217,7 +238,7 @@ VideoCapturer* DeviceManager::CreateVideoCapturer(const Device& device) const {
     capturer->set_repeat(talk_base::kForever);
     return capturer;
   }
-  VideoCapturer* capturer = device_video_capturer_factory_->Create(device);
+  VideoCapturer* capturer = device_video_capturer_factory_->Create(device, this);
   if (!capturer) {
     return NULL;
   }

@@ -118,6 +118,7 @@ class PeerConnection : public PeerConnectionInterface,
   virtual void OnIceGatheringChange(IceGatheringState new_state);
   virtual void OnIceCandidate(const IceCandidateInterface* candidate);
   virtual void OnIceComplete();
+  virtual void OnCandidateTimeout();
 
   // Signals from WebRtcSession.
   void OnSessionStateChange(cricket::BaseSession* session,

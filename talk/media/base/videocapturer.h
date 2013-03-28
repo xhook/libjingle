@@ -40,6 +40,9 @@
 #include "talk/media/base/videocommon.h"
 #include "talk/media/devices/devicemanager.h"
 
+namespace webrtc {
+class I420VideoFrame;
+}
 
 namespace cricket {
 
@@ -227,6 +230,9 @@ class VideoCapturer
   // called concurrently. It also ensures that it is safe to call disconnect
   // at any time which is needed since the signal may be called from an
   // unmarshalled thread owned by the VideoCapturer.
+  // Signal the captured frame to downstream.
+  sigslot::signal2<VideoCapturer*, const webrtc::I420VideoFrame*,
+          sigslot::multi_threaded_local> SignalI420FrameCaptured;
   // Signal the captured frame to downstream.
   sigslot::signal2<VideoCapturer*, const CapturedFrame*,
                    sigslot::multi_threaded_local> SignalFrameCaptured;

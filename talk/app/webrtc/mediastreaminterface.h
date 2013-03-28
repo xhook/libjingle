@@ -51,6 +51,8 @@ class VideoFrame;
 
 namespace webrtc {
 
+class I420VideoFrame;
+
 // Generic observer interface.
 class ObserverInterface {
  public:
@@ -112,7 +114,11 @@ class MediaStreamTrackInterface : public talk_base::RefCountInterface,
 class VideoRendererInterface {
  public:
   virtual void SetSize(int width, int height) = 0;
-  virtual void RenderFrame(const cricket::VideoFrame* frame) = 0;
+  virtual void RenderFrame(const webrtc::I420VideoFrame* frame) = 0;
+  // Change cropping
+  virtual bool SetCropping(float left, float right, float bottom, float top) = 0;
+  // Take screenshot in RGB format and return a pointer to an internal array.
+  virtual bool TakeScreenshotRGB24(const uint8_t ** buffer, uint32_t * width, uint32_t * height) = 0;
 
  protected:
   // The destructor is protected to prevent deletion via the interface.

@@ -170,38 +170,17 @@ class WebRtcRenderAdapter : public webrtc::ExternalRenderer {
   }
   virtual int DeliverFrame(unsigned char* buffer, int buffer_size,
                            uint32_t time_stamp, int64_t render_time) {
+    return -1;
+  }
+  int DeliverI420Frame(webrtc::I420VideoFrame* frame) {
     talk_base::CritScope cs(&crit_);
     frame_rate_tracker_.Update(1);
     if (renderer_ == NULL) {
       return 0;
     }
-    WebRtcVideoFrame video_frame;
-    // Convert 90K rtp timestamp to ns timestamp.
-    int64 rtp_time_stamp_in_ns = (time_stamp / 90) *
-        talk_base::kNumNanosecsPerMillisec;
-    // Convert milisecond render time to ns timestamp.
-    int64 render_time_stamp_in_ns = render_time *
-        talk_base::kNumNanosecsPerMillisec;
-    // Send the rtp timestamp to renderer as the VideoFrame timestamp.
-    // and the render timestamp as the VideoFrame elapsed_time.
-    video_frame.Attach(buffer, buffer_size, width_, height_,
-                       1, 1, render_time_stamp_in_ns,
-                       rtp_time_stamp_in_ns, 0);
-
-
-    // Sanity check on decoded frame size.
-    if (buffer_size != static_cast<int>(VideoFrame::SizeOf(width_, height_))) {
-      LOG(LS_WARNING) << "WebRtcRenderAdapter received a strange frame size: "
-                      << buffer_size;
-    }
-
-    int ret = renderer_->RenderFrame(&video_frame) ? 0 : -1;
-    uint8* buffer_temp;
-    size_t buffer_size_temp;
-    video_frame.Detach(&buffer_temp, &buffer_size_temp);
+    int ret = renderer_->RenderFrame(frame) ? 0 : -1;
     return ret;
   }
-
   unsigned int width() {
     talk_base::CritScope cs(&crit_);
     return width_;
@@ -853,15 +832,6 @@ void WebRtcVideoEngine::OnFrameCaptured(VideoCapturer* capturer,
     return;
   }
 
-  // Send I420 frame to the local renderer.
-  if (local_renderer_) {
-    if (local_renderer_w_ != static_cast<int>(i420_frame.GetWidth()) ||
-        local_renderer_h_ != static_cast<int>(i420_frame.GetHeight())) {
-      local_renderer_->SetSize(local_renderer_w_ = i420_frame.GetWidth(),
-                               local_renderer_h_ = i420_frame.GetHeight(), 0);
-    }
-    local_renderer_->RenderFrame(&i420_frame);
-  }
   // Send I420 frame to the registered senders.
   talk_base::CritScope cs(&channels_crit_);
   for (VideoChannels::iterator it = channels_.begin();
@@ -869,6 +839,20 @@ void WebRtcVideoEngine::OnFrameCaptured(VideoCapturer* capturer,
     if ((*it)->sending()) (*it)->SendFrame(capturer, &i420_frame);
   }
 }
+
+void WebRtcVideoEngine::OnI420FrameCaptured(VideoCapturer* capturer,
+                                        const webrtc::I420VideoFrame* frame) {
+    // Send I420 frame to the local renderer.
+    if (local_renderer_) {
+        if (local_renderer_w_ != static_cast<int>(frame->width()) ||
+            local_renderer_h_ != static_cast<int>(frame->height())) {
+            local_renderer_->SetSize(local_renderer_w_ = frame->width(),
+                                     local_renderer_h_ = frame->height(), 0);
+        }
+        local_renderer_->RenderFrame(frame);
+    }
+}
+
 
 const std::vector<VideoCodec>& WebRtcVideoEngine::codecs() const {
   return video_codecs_;
@@ -1165,6 +1149,8 @@ bool WebRtcVideoEngine::SetCapturer(VideoCapturer* capturer) {
   SignalCaptureStateChange.repeat(capturer->SignalStateChange);
   capturer->SignalFrameCaptured.connect(this,
       &WebRtcVideoEngine::OnFrameCaptured);
+  capturer->SignalI420FrameCaptured.connect(this,
+      &WebRtcVideoEngine::OnI420FrameCaptured);
   ClearCapturer();
   video_capturer_ = capturer;
   // Possibly restart the capturer if it is supposed to be running.

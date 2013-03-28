@@ -55,8 +55,8 @@ class WebRtcVcmFactoryInterface {
 class WebRtcVideoCapturer : public VideoCapturer,
                             public webrtc::VideoCaptureDataCallback {
  public:
-  WebRtcVideoCapturer();
-  explicit WebRtcVideoCapturer(WebRtcVcmFactoryInterface* factory);
+  WebRtcVideoCapturer(talk_base::Thread* thread = NULL);
+  explicit WebRtcVideoCapturer(WebRtcVcmFactoryInterface* factory, talk_base::Thread* thread = NULL);
   virtual ~WebRtcVideoCapturer();
 
   bool Init(const Device& device);
