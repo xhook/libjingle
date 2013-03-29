@@ -84,6 +84,9 @@ class IceObserver {
   // (via PeerConnectionObserver)
   virtual void OnIceComplete() {}
 
+  // Deprecated. All Ice candidates are closed.
+  virtual void OnIceTimeout() {}
+
  protected:
   ~IceObserver() {}
 };

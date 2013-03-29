@@ -33,6 +33,8 @@
 #include "talk/base/scoped_ptr.h"
 #include "talk/media/webrtc/webrtcvideoframe.h"
 
+#include "webrtc/common_video/libyuv/include/webrtc_libyuv.h"
+
 using webrtc::FakeVideoTrackRenderer;
 using webrtc::VideoTrack;
 using webrtc::VideoTrackInterface;
@@ -55,9 +57,11 @@ TEST(VideoTrack, RenderVideo) {
   EXPECT_EQ(123, renderer_1->width());
   EXPECT_EQ(123, renderer_1->height());
 
-  cricket::WebRtcVideoFrame frame;
-  frame.InitToBlack(123, 123, 1, 1, 0, 0);
+  webrtc::I420VideoFrame frame;
+  int res = frame.CreateEmptyFrame(123, 123, 123, 62, 62);
+  EXPECT_EQ(0, res);
   render_input->RenderFrame(&frame);
+  EXPECT_EQ(0, renderer_1->errors());
   EXPECT_EQ(1, renderer_1->num_rendered_frames());
 
   // FakeVideoTrackRenderer register itself to |video_track|

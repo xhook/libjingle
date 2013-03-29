@@ -32,6 +32,8 @@
 #include "talk/media/base/videoframe.h"
 #include "talk/media/base/videorenderer.h"
 
+#include "webrtc/common_video/interface/i420_video_frame.h"
+
 namespace cricket {
 
 // Faked video renderer that has a callback for actions on rendering.
@@ -53,11 +55,11 @@ class FakeVideoRenderer : public VideoRenderer {
     return true;
   }
 
-  virtual bool RenderFrame(const VideoFrame* frame) {
+  virtual bool RenderFrame(const webrtc::I420VideoFrame* frame) {
     // Treat unexpected frame size as error.
     if (!frame ||
-        frame->GetWidth() != static_cast<size_t>(width_) ||
-        frame->GetHeight() != static_cast<size_t>(height_)) {
+        frame->width() != static_cast<size_t>(width_) ||
+        frame->height() != static_cast<size_t>(height_)) {
       ++errors_;
       return false;
     }
@@ -65,6 +67,10 @@ class FakeVideoRenderer : public VideoRenderer {
     SignalRenderFrame(frame);
     return true;
   }
+  
+  bool SetCropping(float left, float right, float bottom, float top) {}
+
+  bool TakeScreenshotRGB24(const uint8_t ** buffer, uint32_t * width, uint32_t * height) {}
 
   int errors() const { return errors_; }
   int width() const { return width_; }
@@ -73,7 +79,7 @@ class FakeVideoRenderer : public VideoRenderer {
   int num_rendered_frames() const { return num_rendered_frames_; }
 
   sigslot::signal3<int, int, int> SignalSetSize;
-  sigslot::signal1<const VideoFrame*> SignalRenderFrame;
+  sigslot::signal1<const webrtc::I420VideoFrame*> SignalRenderFrame;
 
  private:
   int errors_;

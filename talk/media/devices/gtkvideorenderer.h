@@ -46,7 +46,7 @@ class GtkVideoRenderer : public VideoRenderer {
   // These two methods may be executed in different threads.
   // SetSize is called before RenderFrame.
   virtual bool SetSize(int width, int height, int reserved);
-  virtual bool RenderFrame(const VideoFrame* frame);
+  virtual bool RenderFrame(const webrtc::I420VideoFrame* frame);
 
  private:
   // Initialize the attributes when the first frame arrives.

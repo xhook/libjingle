@@ -633,7 +633,7 @@ void PeerConnection::OnMessage(talk_base::Message* msg) {
       break;
     }
     case MSG_ICETIMEOUT: {
-      observer_->OnCandidateTimeout();
+      observer_->OnIceTimeout();
       break;
     }
     default:

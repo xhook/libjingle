@@ -38,7 +38,7 @@ class NullVideoRenderer : public VideoRenderer {
     return true;
   }
   // Called when a new frame is available for display.
-  virtual bool RenderFrame(const VideoFrame *frame) {
+  virtual bool RenderFrame(const webrtc::I420VideoFrame *frame) {
     return true;
   }
 };

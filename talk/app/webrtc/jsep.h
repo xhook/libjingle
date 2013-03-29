@@ -145,8 +145,6 @@ class CreateSessionDescriptionObserver : public talk_base::RefCountInterface {
   virtual void OnSuccess(SessionDescriptionInterface* desc) = 0;
   virtual void OnFailure(const std::string& error) = 0;
 
-  virtual void OnCandidateTimeout() = 0;
-
  protected:
   ~CreateSessionDescriptionObserver() {}
 };

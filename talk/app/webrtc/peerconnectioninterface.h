@@ -291,6 +291,9 @@ class PeerConnectionObserver {
   // All Ice candidates have been found.
   virtual void OnIceComplete() {}
 
+  // Deprecated. All Ice candidates are closed
+  virtual void OnIceTimeout() {}
+
  protected:
   // Dtor protected as objects shouldn't be deleted via this interface.
   ~PeerConnectionObserver() {}

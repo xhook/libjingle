@@ -37,6 +37,9 @@
 #include "talk/base/logging.h"
 #include "talk/base/stringutils.h"
 
+#include "webrtc/common_video/libyuv/include/webrtc_libyuv.h"
+#include "webrtc/common_video/interface/i420_video_frame.h"
+
 using talk_base::sprintfn;
 
 namespace {
@@ -491,15 +494,15 @@ void GtkMainWnd::VideoRenderer::SetSize(int width, int height) {
   gdk_threads_leave();
 }
 
-void GtkMainWnd::VideoRenderer::RenderFrame(const cricket::VideoFrame* frame) {
+void GtkMainWnd::VideoRenderer::RenderFrame(const webrtc::I420VideoFrame* frame) {
   gdk_threads_enter();
 
   int size = width_ * height_ * 4;
-  // TODO: Convert directly to RGBA
-  frame->ConvertToRgbBuffer(cricket::FOURCC_ARGB,
-                            image_.get(),
-                            size,
-                            width_ * 4);
+  
+  // convert I420 frame to ABGR format, which is accepted by GTK
+  webrtc::I420VideoFrame frameCopy;
+  frameCopy.CopyFrame(*frame);
+  ConvertFromI420(frameCopy, webrtc::kARGB, 0, image_.get());
   // Convert the B,G,R,A frame to R,G,B,A, which is accepted by GTK.
   // The 'A' is just padding for GTK, so we can use it as temp.
   uint8* pix = image_.get();

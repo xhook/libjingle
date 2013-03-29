@@ -95,7 +95,9 @@ class GtkMainWnd : public MainWindow {
 
     // VideoRendererInterface implementation
     virtual void SetSize(int width, int height);
-    virtual void RenderFrame(const cricket::VideoFrame* frame);
+    virtual void RenderFrame(const webrtc::I420VideoFrame* frame);
+    virtual bool SetCropping(float left, float right, float bottom, float top) {}
+    virtual bool TakeScreenshotRGB24(const uint8_t ** buffer, uint32_t * width, uint32_t * height) {}
 
     const uint8* image() const {
       return image_.get();

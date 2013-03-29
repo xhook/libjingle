@@ -27,7 +27,6 @@
 
 #include "modules/video_render/include/video_render.h"
 
-#include "talk/app/webrtc/config.h"
 #include "talk/app/webrtc/mediastreaminterface.h"
 #include "talk/media/base/videocapturer.h"
 
@@ -39,57 +38,41 @@ class WebRtcVideoRenderer
 {
 public:
 
-  JINGLE_API static talk_base::scoped_refptr<VideoRendererInterface> Create(
-    uint32_t id,
-    void* window,
-    const bool fullscreen,
-    cricket::VideoCapturer * capturer = NULL,
-    bool mirror_x = false,
-    bool mirror_y = false);
+  WebRtcVideoRenderer(uint32_t id,
+                      void* window,
+                      const bool fullscreen,
+                      cricket::VideoCapturer * capturer = NULL,
+                      bool mirror_x = false,
+                      bool mirror_y = false);
 
-	WebRtcVideoRenderer(uint32_t id,
-                        void* window,
-                        const bool fullscreen,
-                        cricket::VideoCapturer * capturer = NULL,
-						bool mirror_x = false,
-						bool mirror_y = false);
+  virtual ~WebRtcVideoRenderer();
 
-    virtual ~WebRtcVideoRenderer();
+  void OnFrameCaptured(cricket::VideoCapturer* capturer,
+                       const webrtc::I420VideoFrame * frame);
 
-//    void OnFrameCaptured(cricket::VideoCapturer* capturer,
-//		                 const cricket::CapturedFrame * frame);
+  // Called when the video has changed size.
+  virtual void SetSize(int width, int height);
 
-    void OnFrameCaptured(cricket::VideoCapturer* capturer,
-		                 const webrtc::I420VideoFrame * frame);
+  void RenderFrame(const webrtc::I420VideoFrame * frame);
 
-	// Called when the video has changed size.
-	virtual void SetSize(int width, int height);
+  bool SetCropping(float left, float right, float bottom, float top);
 
-//	// Called when a new frame is available for display.
-//	virtual void RenderFrame(const cricket::VideoFrame * frame);
-
-//    void RenderFrame(const cricket::CapturedFrame * frame);
-    void RenderFrame(const webrtc::I420VideoFrame * frame);
-
-	bool SetCropping(float left, float right, float bottom, float top);
-
-	bool TakeScreenshotRGB24(const uint8_t ** buffer, uint32_t * width, uint32_t * height);
+  bool TakeScreenshotRGB24(const uint8_t ** buffer, uint32_t * width, uint32_t * height);
 
 protected:
 
-    bool RenderFrame();
+  bool RenderFrame();
 
 private:
 
-	uint32_t stream_id_;
-	webrtc::I420VideoFrame frame_;
-	webrtc::I420VideoFrame frame_copy_;
-	webrtc::VideoRender * video_render_;
-	webrtc::VideoRenderCallback * video_render_cb_;
-    cricket::VideoCapturer * capturer_;
-
-	std::vector<uint8_t> screenshot_;
-	talk_base::CriticalSection cs_scr_;
+  uint32_t stream_id_;
+  webrtc::I420VideoFrame frame_;
+  webrtc::I420VideoFrame frame_copy_;
+  webrtc::VideoRender * video_render_;
+  webrtc::VideoRenderCallback * video_render_cb_;
+  cricket::VideoCapturer * capturer_;
+  std::vector<uint8_t> screenshot_;
+  talk_base::CriticalSection cs_scr_;
 };
 
 

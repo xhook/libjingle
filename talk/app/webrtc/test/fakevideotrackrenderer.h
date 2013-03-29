@@ -31,6 +31,8 @@
 #include "talk/app/webrtc/mediastreaminterface.h"
 #include "talk/media/base/fakevideorenderer.h"
 
+#include "webrtc/common_video/interface/i420_video_frame.h"
+
 namespace webrtc {
 
 class FakeVideoTrackRenderer : public VideoRendererInterface {
@@ -48,9 +50,12 @@ class FakeVideoTrackRenderer : public VideoRendererInterface {
     fake_renderer_.SetSize(width, height, 0);
   }
 
-  virtual void RenderFrame(const cricket::VideoFrame* frame) {
+  virtual void RenderFrame(const webrtc::I420VideoFrame* frame) {
     fake_renderer_.RenderFrame(frame);
   }
+
+  bool SetCropping(float left, float right, float bottom, float top) {}
+  bool TakeScreenshotRGB24(const uint8_t ** buffer, uint32_t * width, uint32_t * height) {}
 
   int errors() const { return fake_renderer_.errors(); }
   int width() const { return fake_renderer_.width(); }

@@ -34,6 +34,9 @@
 #include "talk/media/base/videocommon.h"
 #include "talk/media/base/videoframe.h"
 
+#include "webrtc/common_video/libyuv/include/webrtc_libyuv.h"
+#include "webrtc/common_video/interface/i420_video_frame.h"
+
 namespace cricket {
 
 class ScopedGdkLock {
@@ -81,16 +84,16 @@ bool GtkVideoRenderer::SetSize(int width, int height, int reserved) {
   return true;
 }
 
-bool GtkVideoRenderer::RenderFrame(const VideoFrame* frame) {
+bool GtkVideoRenderer::RenderFrame(const webrtc::I420VideoFrame* frame) {
   if (!frame) {
     return false;
   }
 
+  webrtc::I420VideoFrame frameCopy;
+  frameCopy.CopyFrame(*frame);
+
   // convert I420 frame to ABGR format, which is accepted by GTK
-  frame->ConvertToRgbBuffer(cricket::FOURCC_ABGR,
-                            image_.get(),
-                            frame->GetWidth() * frame->GetHeight() * 4,
-                            frame->GetWidth() * 4);
+  ConvertFromI420(frameCopy, webrtc::kARGB, 0, image_.get());
 
   ScopedGdkLock lock;
 
@@ -103,11 +106,11 @@ bool GtkVideoRenderer::RenderFrame(const VideoFrame* frame) {
                         draw_area_->style->fg_gc[GTK_STATE_NORMAL],
                         0,
                         0,
-                        frame->GetWidth(),
-                        frame->GetHeight(),
+                        frame->width(),
+                        frame->height(),
                         GDK_RGB_DITHER_MAX,
                         image_.get(),
-                        frame->GetWidth() * 4);
+                        frame->width() * 4);
 
   // Run the Gtk main loop to refresh the window.
   Pump();
