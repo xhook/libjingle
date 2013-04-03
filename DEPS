@@ -14,7 +14,7 @@ vars = {
   "chromium_revision": "187216",
   "webrtc_revision": "3742",
 
-  "webrtc_hash": "@4a3cc90e412c81c727da9a77ec15d72f0c1bcd07",
+  "webrtc_hash": "@5c2c3a2038b41e3ac388fc0356fc55ab75434c9d",
 }
 
 # NOTE: Prefer revision numbers to tags for svn deps. Use http rather than
